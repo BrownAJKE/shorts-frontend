@@ -5,7 +5,7 @@ import "./globals.css"
 import { siteConfig } from "./siteConfig"
 
 import { Sidebar } from "@/components/ui/navigation/Sidebar"
-import { AuthProvider } from "@/contexts/AuthContext"
+import { AppProviders } from "@/lib/providers"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -49,14 +49,14 @@ export default function RootLayout({
         className={`${inter.className} overflow-y-scroll scroll-auto antialiased selection:bg-indigo-100 selection:text-indigo-700 dark:bg-gray-950`}
         suppressHydrationWarning
       >
-        <AuthProvider>
+        <AppProviders>
           <div className="mx-auto max-w-screen-2xl">
             <ThemeProvider defaultTheme="system" attribute="class">
               <Sidebar />
               <main className="lg:pl-72">{children}</main>
             </ThemeProvider>
           </div>
-        </AuthProvider>
+        </AppProviders>
       </body>
     </html>
   )

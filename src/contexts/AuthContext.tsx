@@ -1,7 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { authService, User, LoginCredentials, RegisterData } from '@/lib/auth';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { authApi, User, LoginCredentials, RegisterData, ApiError } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
 
 interface AuthContextType {
   user: User | null;
@@ -28,76 +30,90 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const isAuthenticated = !!user;
+  // Check if user has a token
+  const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('auth_token');
 
-  useEffect(() => {
-    // Check if user is already authenticated on mount
-    const checkAuth = async () => {
-      try {
-        if (authService.isAuthenticated()) {
-          const isValid = await authService.verifyToken();
-          if (isValid) {
-            const userData = await authService.getCurrentUser();
-            setUser(userData);
-          } else {
-            authService.logout();
-          }
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        authService.logout();
-      } finally {
-        setIsLoading(false);
+  // Query for current user data
+  const {
+    data: user,
+    isLoading: isUserLoading,
+    error: userError,
+  } = useQuery({
+    queryKey: queryKeys.auth.me,
+    queryFn: authApi.getCurrentUser,
+    enabled: hasToken, // Only run if user has a token
+    retry: false, // Don't retry auth queries
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Login mutation
+  const loginMutation = useMutation({
+    mutationFn: authApi.login,
+    onSuccess: (data) => {
+      // Store token
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('auth_token', data.access_token);
       }
-    };
+      // Invalidate and refetch user data
+      queryClient.invalidateQueries({ queryKey: queryKeys.auth.me });
+    },
+    onError: (error) => {
+      console.error('Login failed:', error);
+    },
+  });
 
-    checkAuth();
-  }, []);
+  // Register mutation
+  const registerMutation = useMutation({
+    mutationFn: authApi.register,
+    onSuccess: () => {
+      // Registration successful, user can now login
+    },
+    onError: (error) => {
+      console.error('Registration failed:', error);
+    },
+  });
 
   const login = async (credentials: LoginCredentials) => {
     try {
-      setError(null);
-      setIsLoading(true);
-      await authService.login(credentials);
-      const userData = await authService.getCurrentUser();
-      setUser(userData);
+      await loginMutation.mutateAsync(credentials);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Login failed';
-      setError(errorMessage);
-      throw error;
-    } finally {
-      setIsLoading(false);
+      if (error instanceof ApiError) {
+        throw new Error(error.message);
+      }
+      throw new Error('Login failed');
     }
   };
 
   const register = async (userData: RegisterData) => {
     try {
-      setError(null);
-      setIsLoading(true);
-      await authService.register(userData);
-      // Auto-login after registration
-      await login({ username: userData.username, password: userData.password });
+      await registerMutation.mutateAsync(userData);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Registration failed';
-      setError(errorMessage);
-      throw error;
-    } finally {
-      setIsLoading(false);
+      if (error instanceof ApiError) {
+        throw new Error(error.message);
+      }
+      throw new Error('Registration failed');
     }
   };
 
   const logout = () => {
-    authService.logout();
-    setUser(null);
-    setError(null);
+    // Clear token
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+    }
+    // Clear all cached data
+    queryClient.clear();
+    // Invalidate auth queries
+    queryClient.invalidateQueries({ queryKey: queryKeys.auth.me });
   };
 
+  const isLoading = isUserLoading || loginMutation.isPending || registerMutation.isPending;
+  const isAuthenticated = !!user && !userError;
+  const error = userError?.message || loginMutation.error?.message || registerMutation.error?.message || null;
+
   const value: AuthContextType = {
-    user,
+    user: user || null,
     isLoading,
     isAuthenticated,
     login,

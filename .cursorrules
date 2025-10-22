@@ -1,0 +1,423 @@
+# Cursor Rules for Next.js Frontend Dashboard
+
+## Project Overview
+This is a Next.js 14 dashboard application with TypeScript, Tailwind CSS, and Radix UI components. The app features authentication, data tables, charts, and a modern UI design system.
+
+## Tech Stack
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS with custom design system
+- **UI Components**: Radix UI primitives + custom components
+- **State Management**: React Context API (auth/shared) + TanStack Query (data)
+- **Authentication**: JWT tokens with email-based auth
+- **Charts**: Recharts
+- **Tables**: TanStack Table
+- **Icons**: Remix Icons
+- **Themes**: next-themes for dark/light mode
+
+## Code Style & Standards
+
+### TypeScript
+- Use strict TypeScript with proper type definitions
+- Prefer interfaces over types for object shapes
+- Use generic types for reusable components
+- Always define return types for functions
+- Use proper error handling with typed errors
+
+### React Best Practices
+- Use functional components with hooks
+- Prefer `useCallback` and `useMemo` for performance optimization
+- Use proper dependency arrays in useEffect
+- Implement proper error boundaries
+- Use React.memo for expensive components
+- Prefer composition over inheritance
+
+### Component Architecture
+- Create reusable, composable components
+- Use compound component patterns where appropriate
+- Implement proper prop interfaces with JSDoc comments
+- Use forwardRef for components that need DOM access
+- Prefer controlled components over uncontrolled
+
+### File Organization
+- Use the `@/` alias for imports from src/
+- Group related components in folders
+- Use index.ts files for clean exports
+- Follow the existing folder structure:
+  - `src/components/` - Reusable UI components
+  - `src/components/ui/` - Complex UI components (tables, navigation)
+  - `src/contexts/` - React contexts
+  - `src/lib/` - Utilities and services
+  - `src/app/` - Next.js app router pages
+
+## Component Guidelines
+
+### UI Components (`src/components/`)
+- Create atomic, reusable components
+- Use Tailwind CSS classes consistently
+- Implement proper accessibility (ARIA labels, keyboard navigation)
+- Support both light and dark themes
+- Use Radix UI primitives as base components
+- Export components with proper TypeScript interfaces
+
+### Data Components (`src/components/ui/`)
+- Use TanStack Table for complex data tables
+- Implement proper loading and error states
+- Use Recharts for data visualization
+- Follow the existing patterns for data fetching
+- Implement proper pagination and filtering
+
+### Navigation Components (`src/components/ui/navigation/`)
+- Use the existing sidebar and mobile navigation patterns
+- Implement proper active state management
+- Support responsive design
+- Use proper ARIA navigation landmarks
+
+## Styling Guidelines
+
+### Tailwind CSS
+- Use utility classes consistently
+- Create custom CSS variables for design tokens
+- Use Tailwind's dark mode classes
+- Implement responsive design with mobile-first approach
+- Use the existing color palette and spacing scale
+
+### Design System
+- Follow the existing component patterns
+- Use consistent spacing (4, 8, 12, 16, 24, 32px)
+- Implement proper focus states and hover effects
+- Use consistent border radius and shadows
+- Follow the existing typography scale
+
+## State Management Architecture
+
+### React Context (Auth & Shared State)
+- Use AuthContext for user authentication state
+- Use React Context for app-wide shared state (theme, settings, etc.)
+- Keep context providers at the app level
+- Use proper state updates with functional updates
+- Implement proper loading and error states for auth
+
+### TanStack Query (Data Management)
+- Use TanStack Query for all server state and data fetching
+- Implement proper query keys for caching and invalidation
+- Use mutations for data updates (create, update, delete)
+- Implement proper loading, error, and success states
+- Use optimistic updates where appropriate
+- Implement proper cache invalidation strategies
+
+### State Management Guidelines
+- **React Context**: Use for auth state, theme, user preferences, and app-wide settings
+- **TanStack Query**: Use for all API data, server state, and data fetching
+- **Local State**: Use useState for component-specific UI state
+- **URL State**: Use Next.js router for navigation and filters
+- Avoid mixing data fetching patterns - stick to TanStack Query for all API calls
+
+## API Integration with TanStack Query
+
+### Data Fetching Patterns
+- Use `useQuery` for data fetching with proper query keys
+- Use `useMutation` for data updates (POST, PUT, DELETE)
+- Implement proper query invalidation after mutations
+- Use `useInfiniteQuery` for paginated data
+- Use `useSuspenseQuery` for critical data that should suspend
+
+### Query Key Patterns
+```typescript
+// Use consistent query key patterns
+const queryKeys = {
+  users: ['users'] as const,
+  user: (id: string) => ['users', id] as const,
+  userProjects: (userId: string) => ['users', userId, 'projects'] as const,
+  projects: ['projects'] as const,
+  project: (id: string) => ['projects', id] as const,
+}
+```
+
+### Mutation Patterns
+```typescript
+// Use proper mutation patterns with invalidation
+const createUserMutation = useMutation({
+  mutationFn: createUser,
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['users'] })
+  },
+})
+```
+
+### Error Handling
+- Use TanStack Query's built-in error handling
+- Implement proper error boundaries for query errors
+- Display user-friendly error messages using query error states
+- Use retry logic with proper retry conditions
+- Implement proper fallback UI for error states
+
+## Performance Optimization
+
+### Code Splitting
+- Use dynamic imports for large components
+- Implement proper loading states
+- Use Next.js built-in optimizations
+
+### Bundle Optimization
+- Use proper tree shaking
+- Avoid unnecessary re-renders
+- Use React.memo for expensive components
+- Implement proper lazy loading
+
+## Testing Guidelines
+
+### Component Testing
+- Write unit tests for utility functions
+- Test component behavior, not implementation
+- Use proper test data and mocks
+- Test accessibility features
+
+### Integration Testing
+- Test user flows end-to-end
+- Test authentication flows
+- Test data fetching and error handling
+
+## Accessibility
+
+### ARIA Guidelines
+- Use proper ARIA labels and descriptions
+- Implement keyboard navigation
+- Use semantic HTML elements
+- Test with screen readers
+
+### Color & Contrast
+- Ensure proper color contrast ratios
+- Don't rely solely on color for information
+- Support high contrast mode
+
+## Security
+
+### Frontend Security
+- Sanitize user inputs
+- Use proper CSP headers
+- Implement proper authentication checks
+- Handle sensitive data carefully
+
+## Development Workflow
+
+### Code Quality
+- Use ESLint and Prettier
+- Follow the existing code style
+- Use meaningful variable and function names
+- Write self-documenting code
+
+### Git Workflow
+- Use descriptive commit messages
+- Create feature branches
+- Use proper pull request reviews
+- Keep commits atomic
+
+## Common Patterns
+
+### Form Handling with TanStack Query
+- Use controlled components with React state
+- Use `useMutation` for form submissions
+- Implement proper validation before submission
+- Show validation errors clearly
+- Use optimistic updates for better UX
+- Handle mutation loading and error states
+
+### Data Display Patterns
+- Use `useQuery` for data fetching
+- Implement proper loading skeletons with `isLoading`
+- Show empty states with `isSuccess && !data`
+- Display error states with `isError`
+- Use `useInfiniteQuery` for paginated data
+- Implement proper cache invalidation
+
+### Navigation with State
+- Use Next.js router for URL state
+- Use React Context for auth state
+- Use TanStack Query for data state
+- Implement proper active states
+- Handle navigation errors gracefully
+
+### Component State Patterns
+```typescript
+// Data fetching component
+const DataComponent = () => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['data'],
+    queryFn: fetchData,
+  })
+
+  if (isLoading) return <LoadingSkeleton />
+  if (error) return <ErrorMessage error={error} />
+  if (!data) return <EmptyState />
+
+  return <DataDisplay data={data} />
+}
+
+// Form submission component
+const FormComponent = () => {
+  const [formData, setFormData] = useState({})
+  
+  const mutation = useMutation({
+    mutationFn: submitForm,
+    onSuccess: () => {
+      // Handle success
+    },
+    onError: (error) => {
+      // Handle error
+    },
+  })
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    mutation.mutate(formData)
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Form fields */}
+      <button disabled={mutation.isPending}>
+        {mutation.isPending ? 'Submitting...' : 'Submit'}
+      </button>
+    </form>
+  )
+}
+```
+
+## File Naming Conventions
+- Use PascalCase for component files: `UserProfile.tsx`
+- Use camelCase for utility files: `authService.ts`
+- Use kebab-case for pages: `user-settings.tsx`
+- Use descriptive names that indicate purpose
+
+## Import Organization
+```typescript
+// 1. React and Next.js imports
+import React from 'react'
+import { useRouter } from 'next/navigation'
+
+// 2. Third-party libraries
+import { useTheme } from 'next-themes'
+
+// 3. Internal components and utilities
+import { Button } from '@/components/Button'
+import { useAuth } from '@/contexts/AuthContext'
+
+// 4. Types and interfaces
+import type { User } from '@/lib/auth'
+```
+
+## TanStack Query Setup Patterns
+```typescript
+// Query client setup
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: (failureCount, error) => {
+        if (error.status === 404) return false
+        return failureCount < 3
+      },
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+})
+
+// App provider setup
+export const AppProviders = ({ children }) => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      {children}
+    </AuthProvider>
+  </QueryClientProvider>
+)
+```
+
+## Error Handling Patterns
+```typescript
+// TanStack Query error handling
+const { data, error, isLoading } = useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers,
+  onError: (error) => {
+    console.error('Failed to fetch users:', error)
+    // Show toast notification
+  },
+})
+
+// Mutation error handling
+const mutation = useMutation({
+  mutationFn: createUser,
+  onError: (error) => {
+    console.error('Failed to create user:', error)
+    // Show error message
+  },
+  onSuccess: (data) => {
+    // Show success message
+    queryClient.invalidateQueries({ queryKey: ['users'] })
+  },
+})
+```
+
+## Component Structure Template
+```typescript
+interface ComponentProps {
+  // Define props with proper types
+}
+
+export const Component: React.FC<ComponentProps> = ({ prop1, prop2 }) => {
+  // TanStack Query hooks
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['data'],
+    queryFn: fetchData,
+  })
+  
+  const mutation = useMutation({
+    mutationFn: updateData,
+    onSuccess: () => {
+      // Handle success
+    },
+  })
+  
+  // Local state
+  const [localState, setLocalState] = useState()
+  
+  // Event handlers
+  const handleClick = useCallback(() => {
+    // Implementation
+  }, [dependencies])
+  
+  // Loading and error states
+  if (isLoading) return <LoadingSkeleton />
+  if (error) return <ErrorMessage error={error} />
+  
+  // Render
+  return (
+    <div className="proper-tailwind-classes">
+      {/* Component content */}
+    </div>
+  )
+}
+```
+
+## Best Practices Summary
+1. **Type Safety**: Always use TypeScript properly
+2. **Performance**: Optimize re-renders and bundle size with TanStack Query caching
+3. **Accessibility**: Implement proper ARIA and keyboard navigation
+4. **Error Handling**: Use TanStack Query's built-in error handling
+5. **Code Quality**: Write clean, maintainable code with proper separation of concerns
+6. **Testing**: Write tests for critical functionality and data flows
+7. **Documentation**: Document complex logic and API integrations
+8. **Security**: Handle sensitive data properly
+9. **Responsive**: Design for all screen sizes
+10. **Consistency**: Follow existing patterns and conventions
+11. **State Management**: Use React Context for auth/shared state, TanStack Query for data
+12. **Caching**: Implement proper cache invalidation strategies
+13. **Loading States**: Always show proper loading and error states
+14. **Optimistic Updates**: Use optimistic updates for better UX where appropriate
+
+Remember: This is a production dashboard application. Prioritize reliability, performance, and user experience in all development decisions. Use TanStack Query for all data operations and React Context only for authentication and shared application state.
