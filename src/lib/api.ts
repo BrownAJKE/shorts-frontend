@@ -262,6 +262,12 @@ export const videoProjectsApi = {
     })
   },
 
+  retry: async (id: string): Promise<{ message: string; project_id: string }> => {
+    return apiRequest<{ message: string; project_id: string }>(`/video-projects/${id}/retry`, {
+      method: 'POST',
+    })
+  },
+
   getByUser: async (userId: string): Promise<VideoProject[]> => {
     return apiRequest<VideoProject[]>(`/users/${userId}/video-projects`)
   },

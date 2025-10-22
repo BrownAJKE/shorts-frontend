@@ -130,6 +130,17 @@ export const useDeleteVideoProject = () => {
   })
 }
 
+export const useRetryVideoProject = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: videoProjectsApi.retry,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.videoProjects.all })
+    },
+  })
+}
+
 // Processing Steps hooks
 export const useProcessingSteps = (params?: Record<string, any>) => {
   return useQuery({

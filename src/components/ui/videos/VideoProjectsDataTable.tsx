@@ -7,7 +7,8 @@ import { Badge } from '@/components/Badge'
 import { DataTable } from '@/components/ui/data-table/DataTable'
 import { 
   useVideoProjects, 
-  useDeleteVideoProject 
+  useDeleteVideoProject,
+  useRetryVideoProject
 } from '@/lib/hooks'
 import { VideoProject } from '@/lib/api'
 import { 
@@ -73,6 +74,7 @@ export function VideoProjectsDataTable({
 }: VideoProjectsDataTableProps) {
   const router = useRouter()
   const deleteProjectMutation = useDeleteVideoProject()
+  const retryProjectMutation = useRetryVideoProject()
   
   const handleViewProject = (projectId: string) => {
     router.push(`/videos/${projectId}`)
@@ -85,6 +87,17 @@ export function VideoProjectsDataTable({
         onRefresh()
       } catch (error) {
         console.error('Failed to delete project:', error)
+      }
+    }
+  }
+  
+  const handleRetryProject = async (projectId: string) => {
+    if (confirm('Are you sure you want to retry this project?')) {
+      try {
+        await retryProjectMutation.mutateAsync(projectId)
+        onRefresh()
+      } catch (error) {
+        console.error('Failed to retry project:', error)
       }
     }
   }

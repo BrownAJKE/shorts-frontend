@@ -11,8 +11,7 @@ import {
   RiDownloadLine, 
   RiDeleteBinLine,
   RiMoreLine,
-  RiPlayLine,
-  RiPauseLine
+  RiRefreshLine
 } from '@remixicon/react'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -21,6 +20,7 @@ interface VideoProjectCardProps {
   onView: (projectId: string) => void
   onDownload?: (projectId: string, fileType: string) => void
   onDelete?: (projectId: string) => void
+  onRetry?: (projectId: string) => void
   className?: string
 }
 
@@ -48,6 +48,7 @@ export function VideoProjectCard({
   onView, 
   onDownload, 
   onDelete,
+  onRetry,
   className 
 }: VideoProjectCardProps) {
   const [showActions, setShowActions] = useState(false)
@@ -66,6 +67,12 @@ export function VideoProjectCard({
     }
   }
 
+  const handleRetry = () => {
+    if (onRetry && confirm('Are you sure you want to retry this project?')) {
+      onRetry(project.id)
+    }
+  }
+
   return (
     <Card className={`p-4 hover:shadow-md transition-shadow ${className}`}>
       <div className="flex items-start justify-between mb-3">
@@ -80,8 +87,7 @@ export function VideoProjectCard({
         <div className="flex items-center gap-2 ml-3">
           <VideoProjectStatusBadge status={project.status} showIcon />
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
             onClick={() => setShowActions(!showActions)}
           >
             <RiMoreLine className="w-4 h-4" />
@@ -103,7 +109,19 @@ export function VideoProjectCard({
       {/* Error Message for Failed Status */}
       {project.status === 'failed' && project.error_message && (
         <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
-          {project.error_message}
+          <div className="flex justify-between items-start">
+            <span className="flex-1">{project.error_message}</span>
+            {onRetry && (
+              <Button
+                variant="secondary"
+                onClick={handleRetry}
+                className="ml-2 text-xs"
+              >
+                <RiRefreshLine className="w-3 h-3 mr-1" />
+                Retry
+              </Button>
+            )}
+          </div>
         </div>
       )}
 
@@ -134,8 +152,7 @@ export function VideoProjectCard({
       {/* Actions */}
       <div className="flex items-center gap-2">
         <Button
-          variant="outline"
-          size="sm"
+          variant="secondary"
           onClick={() => onView(project.id)}
           className="flex-1"
         >
@@ -145,18 +162,25 @@ export function VideoProjectCard({
         
         {project.status === 'ready' && onDownload && (
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
             onClick={() => handleDownload('final_video')}
           >
             <RiDownloadLine className="w-4 h-4" />
           </Button>
         )}
         
+        {project.status === 'failed' && onRetry && (
+          <Button
+            variant="secondary"
+            onClick={handleRetry}
+          >
+            <RiRefreshLine className="w-4 h-4" />
+          </Button>
+        )}
+        
         {onDelete && (
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
             onClick={handleDelete}
           >
             <RiDeleteBinLine className="w-4 h-4" />
@@ -169,8 +193,7 @@ export function VideoProjectCard({
         <div className="mt-3 pt-3 border-t border-gray-200">
           <div className="flex flex-wrap gap-2">
             <Button
-              variant="outline"
-              size="sm"
+              variant="secondary"
               onClick={() => onView(project.id)}
             >
               <RiEyeLine className="w-4 h-4 mr-1" />
@@ -180,30 +203,37 @@ export function VideoProjectCard({
             {project.status === 'ready' && onDownload && (
               <>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="secondary"
                   onClick={() => handleDownload('final_video')}
                 >
                   <RiDownloadLine className="w-4 h-4 mr-1" />
                   Final Video
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="secondary"
                   onClick={() => handleDownload('audio')}
                 >
                   <RiDownloadLine className="w-4 h-4 mr-1" />
                   Audio
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="secondary"
                   onClick={() => handleDownload('script')}
                 >
                   <RiDownloadLine className="w-4 h-4 mr-1" />
                   Script
                 </Button>
               </>
+            )}
+            
+            {project.status === 'failed' && onRetry && (
+              <Button
+                variant="secondary"
+                onClick={handleRetry}
+              >
+                <RiRefreshLine className="w-4 h-4 mr-1" />
+                Retry Project
+              </Button>
             )}
           </div>
         </div>

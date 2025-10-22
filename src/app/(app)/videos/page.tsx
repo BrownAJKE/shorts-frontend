@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { ProgressBar } from '@/components/ProgressBar'
-import { useVideoProjects } from '@/lib/hooks'
+import { useVideoProjects, useRetryVideoProject } from '@/lib/hooks'
 import { 
   RiRefreshLine, 
   RiVideoLine, 
@@ -133,6 +133,8 @@ export default function VideosPage() {
     refetch 
   } = useVideoProjects({ refreshKey })
 
+  const retryProjectMutation = useRetryVideoProject()
+
   // Show API data when available, fallback to demo data
   const displayData = useApiData && projects && projects.length > 0 
     ? [
@@ -167,6 +169,17 @@ export default function VideosPage() {
 
   const handleUseDemoData = () => {
     setUseApiData(false)
+  }
+
+  const handleRetryProject = async (projectId: string) => {
+    if (confirm('Are you sure you want to retry this project?')) {
+      try {
+        await retryProjectMutation.mutateAsync(projectId)
+        handleRefresh()
+      } catch (error) {
+        console.error('Failed to retry project:', error)
+      }
+    }
   }
 
   const getProgressPercentage = (progress: any) => {
@@ -438,6 +451,16 @@ export default function VideosPage() {
                               <Button variant="secondary">
                                 <RiDownloadLine className="w-4 h-4 mr-1" />
                                 Download
+                              </Button>
+                            )}
+                            {project.status === 'failed' && !isUsingDemoData && (
+                              <Button 
+                                variant="secondary"
+                                onClick={() => handleRetryProject(project.id)}
+                                disabled={retryProjectMutation.isPending}
+                              >
+                                <RiRefreshLine className="w-4 h-4 mr-1" />
+                                {retryProjectMutation.isPending ? 'Retrying...' : 'Retry'}
                               </Button>
                             )}
                           </div>
