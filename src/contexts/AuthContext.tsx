@@ -32,7 +32,10 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const queryClient = useQueryClient();
 
-  // Query for current user data - always enabled, let the API handle auth
+  // Check if we have a token before making the query
+  const hasToken = typeof window !== 'undefined' && localStorage.getItem('auth_token');
+
+  // Query for current user data - only enabled if we have a token
   const {
     data: user,
     isLoading: isUserLoading,
@@ -40,6 +43,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   } = useQuery({
     queryKey: queryKeys.auth.me,
     queryFn: authApi.getCurrentUser,
+    enabled: !!hasToken, // Only run query if we have a token
     retry: false, // Don't retry auth queries
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -109,7 +113,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const isLoading = isUserLoading || loginMutation.isPending || registerMutation.isPending;
-  const isAuthenticated = !!user && !userError;
+  const isAuthenticated = !!hasToken && !!user && !userError;
   const error = userError?.message || loginMutation.error?.message || registerMutation.error?.message || null;
 
   const value: AuthContextType = {
