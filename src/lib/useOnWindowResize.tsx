@@ -4,6 +4,9 @@ import * as React from "react"
 
 export const useOnWindowResize = (handler: { (): void }) => {
   React.useEffect(() => {
+    // Only run on client side to prevent hydration issues
+    if (typeof window === "undefined") return;
+    
     const handleResize = () => {
       handler()
     }

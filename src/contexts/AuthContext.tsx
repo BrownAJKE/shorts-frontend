@@ -32,10 +32,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const queryClient = useQueryClient();
 
-  // Check if user has a token
-  const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('auth_token');
-
-  // Query for current user data
+  // Query for current user data - always enabled, let the API handle auth
   const {
     data: user,
     isLoading: isUserLoading,
@@ -43,7 +40,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   } = useQuery({
     queryKey: queryKeys.auth.me,
     queryFn: authApi.getCurrentUser,
-    enabled: hasToken, // Only run if user has a token
     retry: false, // Don't retry auth queries
     staleTime: 5 * 60 * 1000, // 5 minutes
   });

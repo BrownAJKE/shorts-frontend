@@ -30,8 +30,10 @@ import { Calendar as CalendarPrimitive, type Matcher } from "./Calendar"
 // ============================================================================
 
 const isBrowserLocaleClockType24h = () => {
-  const language =
-    typeof window !== "undefined" ? window.navigator.language : "en-US"
+  // Default to 12-hour format for SSR consistency
+  if (typeof window === "undefined") return false;
+  
+  const language = window.navigator.language || "en-US"
 
   const hr = new Intl.DateTimeFormat(language, {
     hour: "numeric",
