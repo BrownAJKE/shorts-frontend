@@ -11,7 +11,6 @@ import { Card } from '@/components/Card';
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     full_name: '',
     password: '',
@@ -41,7 +40,7 @@ export default function LoginPage() {
     try {
       if (isLogin) {
         await login({
-          username: formData.username,
+          email: formData.email,
           password: formData.password,
         });
       } else {
@@ -54,7 +53,6 @@ export default function LoginPage() {
         }
         
         await register({
-          username: formData.username,
           email: formData.email,
           full_name: formData.full_name,
           password: formData.password,
@@ -75,7 +73,6 @@ export default function LoginPage() {
     setIsLogin(!isLogin);
     setError(null);
     setFormData({
-      username: '',
       email: '',
       full_name: '',
       password: '',
@@ -113,35 +110,21 @@ export default function LoginPage() {
             )}
 
             <div>
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="username"
-                name="username"
-                type="text"
+                id="email"
+                name="email"
+                type="email"
                 required
-                value={formData.username}
+                value={formData.email}
                 onChange={handleInputChange}
-                placeholder="Enter your username"
+                placeholder="Enter your email"
                 className="mt-1"
               />
             </div>
 
             {!isLogin && (
               <>
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="Enter your email"
-                    className="mt-1"
-                  />
-                </div>
-
                 <div>
                   <Label htmlFor="full_name">Full Name</Label>
                   <Input

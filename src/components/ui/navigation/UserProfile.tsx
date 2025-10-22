@@ -32,7 +32,7 @@ export const UserProfileDesktop = () => {
           >
             {getInitials(user?.full_name)}
           </span>
-          <span>{user?.full_name || user?.username || 'User'}</span>
+          <span>{user?.full_name || 'User'}</span>
         </span>
         <RiMore2Fill
           className="size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-hover:dark:text-gray-400"

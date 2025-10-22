@@ -3,14 +3,13 @@
  */
 
 export interface User {
-  username: string;
-  email?: string;
+  email: string;
   full_name?: string;
   is_active: boolean;
 }
 
 export interface LoginCredentials {
-  username: string;
+  email: string;
   password: string;
 }
 
@@ -20,7 +19,6 @@ export interface AuthResponse {
 }
 
 export interface RegisterData {
-  username: string;
   email: string;
   full_name: string;
   password: string;
@@ -36,16 +34,18 @@ class AuthService {
   }
 
   /**
-   * Login user with username and password
+   * Login user with email and password
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const formData = new FormData();
-    formData.append('username', credentials.username);
-    formData.append('password', credentials.password);
-
     const response = await fetch(`${this.baseUrl}/auth/login`, {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: credentials.email,
+        password: credentials.password,
+      }),
     });
 
     if (!response.ok) {
