@@ -4,7 +4,6 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { siteConfig } from "./siteConfig"
 
-import { Sidebar } from "@/components/ui/navigation/Sidebar"
 import { AppProviders } from "@/lib/providers"
 
 const inter = Inter({
@@ -50,12 +49,9 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <AppProviders>
-          <div className="mx-auto max-w-screen-2xl">
-            <ThemeProvider defaultTheme="system" attribute="class">
-              <Sidebar />
-              <main className="lg:pl-72">{children}</main>
-            </ThemeProvider>
-          </div>
+          <ThemeProvider defaultTheme="system" attribute="class">
+            {children}
+          </ThemeProvider>
         </AppProviders>
       </body>
     </html>
