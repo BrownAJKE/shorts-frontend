@@ -94,12 +94,15 @@ const apiRequest = async <T>(
   const token = getAuthToken()
   
   const config: RequestInit = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
     ...options,
+    headers: {
+      // Only set Content-Type for JSON, not for FormData
+      ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+      // Include any existing headers first
+      ...options.headers,
+      // Always include Authorization if token exists (this overrides any existing Authorization)
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, config)
@@ -219,10 +222,30 @@ export const videoProjectsApi = {
     return apiRequest<VideoProject>(`/video-projects/${id}`)
   },
 
-  create: async (data: Partial<VideoProject>): Promise<VideoProject> => {
+  create: async (data: Partial<VideoProject> & { video_file?: File; music_file?: File }): Promise<VideoProject> => {
+    const formData = new FormData()
+    
+    // Add text fields
+    Object.entries(data).forEach(([key, value]) => {
+      if (key !== 'video_file' && key !== 'music_file' && value !== undefined && value !== null) {
+        formData.append(key, String(value))
+      }
+    })
+    
+    // Add files
+    if (data.video_file) {
+      formData.append('video_file', data.video_file)
+    }
+    if (data.music_file) {
+      formData.append('music_file', data.music_file)
+    }
+    
     return apiRequest<VideoProject>('/video-projects', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: formData,
+      headers: {
+        // Don't set Content-Type, let the browser set it with boundary for FormData
+      },
     })
   },
 

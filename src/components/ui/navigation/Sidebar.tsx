@@ -6,6 +6,7 @@ import {
   RiLinkM,
   RiListCheck,
   RiSettings5Line,
+  RiVideoLine,
 } from "@remixicon/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -19,6 +20,7 @@ import { UserProfileDesktop, UserProfileMobile } from "./UserProfile"
 const navigation = [
   { name: "Overview", href: siteConfig.baseLinks.overview, icon: RiHome2Line },
   { name: "Details", href: siteConfig.baseLinks.details, icon: RiListCheck },
+  { name: "Video Projects", href: siteConfig.baseLinks.videos, icon: RiVideoLine },
   {
     name: "Settings",
     href: siteConfig.baseLinks.settings.general,
