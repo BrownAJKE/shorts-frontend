@@ -152,9 +152,11 @@ export const authApi = {
   },
 
   logout: async (): Promise<void> => {
-    // Clear token from localStorage
+    // Clear token from localStorage and cookies
     if (typeof window !== 'undefined') {
       localStorage.removeItem('auth_token')
+      // Also clear token from cookies
+      document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
   },
 }

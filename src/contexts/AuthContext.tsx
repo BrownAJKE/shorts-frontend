@@ -52,9 +52,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
-      // Store token
+      // Store token in both localStorage and cookies
       if (typeof window !== 'undefined') {
         localStorage.setItem('auth_token', data.access_token);
+        // Also store in cookies for middleware access
+        document.cookie = `auth_token=${data.access_token}; path=/; max-age=${7 * 24 * 60 * 60}`; // 7 days
       }
       // Invalidate and refetch user data
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.me });
@@ -98,9 +100,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = () => {
-    // Clear token
+    // Clear token from localStorage
     if (typeof window !== 'undefined') {
       localStorage.removeItem('auth_token');
+      // Also clear token from cookies
+      document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
     // Clear all cached data
     queryClient.clear();
